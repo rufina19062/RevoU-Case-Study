@@ -1,0 +1,55 @@
+-- Jumlah peminjaman sepeda tahun 2021-2022
+SELECT 
+  FORMAT_DATE('%Y-%m', start_time) AS month_year,
+  COUNT(DISTINCT trip_id) num_trip
+FROM `bigquery-public-data.austin_bikeshare.bikeshare_trips` 
+WHERE DATE(start_time) >= '2021-01-01'
+GROUP BY 1
+ORDER BY 1
+
+-- Jumlah peminjaman sepeda berdasarkan stasiun awal tahun 2021-2022
+SELECT 
+  start_station_name,
+  COUNT(trip_id) as trip_id
+FROM `bigquery-public-data.austin_bikeshare.bikeshare_trips` 
+WHERE DATE(start_time) >= '2021-01-01'
+GROUP BY start_station_name
+ORDER BY 2 DESC
+
+-- Durasi Peminjaman Sepeda di Stasiun 21st/Speedway @PCL (yaitu stasiun dengan jumlah peminjaman sepeda terbanyak) per Bulan
+SELECT 
+  FORMAT_DATE('%Y-%m', start_time) AS year_month,
+  SUM(duration_minutes)/COUNT(trip_id) AS duration
+FROM `bigquery-public-data.austin_bikeshare.bikeshare_trips` 
+WHERE 
+  DATE(start_time) >= '2021-01-01'
+AND
+  start_station_name = '21st/Speedway @ PCL'
+GROUP BY 1
+ORDER BY 1
+
+-- Jumlah peminjaman sepeda Berdasarkan Tipe Pelanggan Tahun 2021-2022
+SELECT 
+  (CASE WHEN subscriber_type IS NULL THEN 'Student Membership'
+  ELSE subscriber_type
+  END) as subscriber_type,
+  COUNT(DISTINCT trip_id) as trip_id,
+  AVG(duration_minutes) as avg_duration_trip
+FROM `bigquery-public-data.austin_bikeshare.bikeshare_trips` 
+WHERE DATE(start_time) >= '2021-01-01'
+GROUP BY subscriber_type
+ORDER BY 2 DESC
+
+-- Durasi Peminjaman Sepeda oleh Student Membership per Bulan
+SELECT
+  FORMAT_DATE('%Y-%m', start_time) AS year_month,
+  SUM(duration_minutes)/COUNT(trip_id) AS duration
+FROM `bigquery-public-data.austin_bikeshare.bikeshare_trips` 
+WHERE 
+  DATE(start_time) >= '2021-01-01'
+AND
+  (subscriber_type = 'Student Membership'
+OR 
+  subscriber_type IS NULL)
+GROUP BY 1
+ORDER BY 1
